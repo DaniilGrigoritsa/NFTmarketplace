@@ -21,13 +21,13 @@ contract NFTmarketplace {
   mapping(address => uint) public fundsSellersCanWithdraw;
 
 
-  event addedToMarketplace(address tokenAddress, uint price, address owner);
+  event addedToMarketplace(address tokenAddress, uint tokenId, uint price, address owner);
 
-  event removedFromMarketplace(address tokenAddress, address owner);
+  event removedFromMarketplace(address tokenAddress, uint tokenId, address owner);
 
-  event NftBought(address tokenAddress, uint price, address buyer);
+  event NftBought(address tokenAddress, uint tokenId, uint price, address buyer);
 
-  event nftPriceChanged(address tokenAdderss, uint newPrice, address owner);
+  event nftPriceChanged(address tokenAdderss, uint tokenId, uint newPrice, address owner);
 
 
   modifier notAdded(address tokenAddress) {
@@ -59,8 +59,8 @@ contract NFTmarketplace {
     require(price > 0, "Price can't be 0");
     require(nft.ownerOf(tokenId) == msg.sender, "Not an owner");
     Listing memory listing = Listing(price, tokenId, msg.sender);
-    listings[tokenAddr] = listing;
-    emit addedToMarketplace(tokenAddr, price, msg.sender);
+    listings[tokenAddr] = listing;  
+    emit addedToMarketplace(tokenAddr, tokenId, price, msg.sender);
   }
 
 
@@ -69,8 +69,8 @@ contract NFTmarketplace {
     onlyOwner(tokenAddr)
     checkId(tokenAddr, _tokenId) 
   {
-      delete listings[tokenAddr];
-      emit removedFromMarketplace(tokenAddr, msg.sender);
+    delete listings[tokenAddr];
+    emit removedFromMarketplace(tokenAddr, _tokenId, msg.sender);
   }
 
 
@@ -78,23 +78,34 @@ contract NFTmarketplace {
     onlyOwner(tokenAddr) 
     checkId(tokenAddr, _tokenId)
   {
+    uint oldPrice = listings[tokenAddr].price;
+    require(oldPrice != newPrice, "Can't change price to equal value");
     listings[tokenAddr].price = newPrice;
-    emit nftPriceChanged(tokenAddr, newPrice, msg.sender);
+    emit nftPriceChanged(tokenAddr, _tokenId, newPrice, msg.sender);
   }
 
 
   function buyToken(address tokenAddr, uint _tokenId) checkId(tokenAddr, _tokenId) external payable {
     require(msg.value == listings[tokenAddr].price, "Insufficient amount sent");
-    
-    address from = listings[tokenAddr].owner;
-    address sender = msg.sender;
+    address to = msg.sender;
+    _buyToken(to, tokenAddr, _tokenId);
+  }
 
+
+  function _buyToken(address _to, address tokenAddr, uint _tokenId) internal {
     ERC721 nft = ERC721(tokenAddr);
-    nft.transferFrom(from, sender, _tokenId);
+    address _owner = listings[tokenAddr].owner;
+    nft.transferFrom(_owner, _to, _tokenId);
     uint amount = listings[tokenAddr].price;
     delete listings[tokenAddr];
-    fundsSellersCanWithdraw[sender] = amount;
-    emit NftBought(tokenAddr, msg.value, sender);
+    fundsSellersCanWithdraw[_owner] = amount;
+    emit NftBought(tokenAddr, _tokenId, msg.value, _to);
+  }
+
+
+  function watchListing(address tokenAddr) external view returns(uint, uint, address) {
+    Listing memory _listing = listings[tokenAddr];
+    return(_listing.price, _listing.tokenId, _listing.owner);
   }
 
 
