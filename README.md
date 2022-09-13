@@ -1,15 +1,7 @@
-# Basic Sample Hardhat Project
+# NFT marketplace smart contract
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+This smart contract implement a basic functionality of NFT marketplace. It allows NFT ownes and buyers to exchange tokens for ether
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+NFTmarketplace.sol is tested with unit tests and slither.py framework 
+To test smart contract persomaly clone this repository and install all dependencies using  `npm i` and `npx hardhat test` or `npx hardhat coverage` of you are using npm 
+To cover contract with slither.py install this package using pip install `slither` and `slither .` after that  
