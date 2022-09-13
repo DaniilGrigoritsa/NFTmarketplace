@@ -95,10 +95,10 @@ contract NFTmarketplace {
   function _buyToken(address _to, address tokenAddr, uint _tokenId) internal {
     ERC721 nft = ERC721(tokenAddr);
     address _owner = listings[tokenAddr].owner;
-    nft.transferFrom(_owner, _to, _tokenId);
     uint amount = listings[tokenAddr].price;
     delete listings[tokenAddr];
     fundsSellersCanWithdraw[_owner] = amount;
+    nft.transferFrom(_owner, _to, _tokenId);
     emit NftBought(tokenAddr, _tokenId, msg.value, _to);
   }
 
