@@ -109,6 +109,12 @@ contract NFTmarketplace {
   }
 
 
+  function watchFundsSellersCanWithdraw(address addr) external view returns(uint) {
+    uint amount = fundsSellersCanWithdraw[addr];
+    return amount ;
+  }
+
+
   function withdraw() external {
     require(fundsSellersCanWithdraw[msg.sender] > 0, "Nothing to return");
     uint amount = fundsSellersCanWithdraw[msg.sender];
